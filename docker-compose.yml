@@ -1,0 +1,41 @@
+version: "3.9"
+
+services:
+    app:
+        restart: always
+        links:
+            - api
+        build:
+            context: ./app
+            dockerfile: Dockerfile
+        volumes:
+            - ./app/src:/app/src
+        ports:
+            - '27015:3000'
+        command: [ 'npm', 'run', 'dev' ]
+
+    api:
+        restart: always
+        links:
+            - db
+        build:
+            context: ./api
+            dockerfile: Dockerfile
+        volumes:
+            - ./api/src:/app/src
+        ports:
+            - '27016:3000'
+        command: [ 'npm', 'run', 'start:dev' ]
+
+    db:
+        image: mongo
+        restart: always
+        ports:
+            - "27017:27017"
+        volumes:
+            - ./data/db:/data/db
+            - ./db/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+        environment:
+            - MONGO_INITDB_ROOT_USERNAME=root
+            - MONGO_INITDB_ROOT_PASSWORD=root
+            - MONGO_INITDB_DATABASE=proexe
